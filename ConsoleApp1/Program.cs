@@ -1,12 +1,17 @@
-﻿void show(int[,] board)
+String[] show(int[,] board)
 {
+    String[] boardS = new string[8];
     for (int i = 0; i < board.GetLength(0); i++)
     {
         for (int j = 0; j < board.GetLength(0); j++)
         {
+            boardS[i] += getPice(board[i, j]) + " ";
             Console.Write(getPice(board[i,j])+" ");
             if (j != 7)
+            {
                 Console.Write("|");
+                boardS[i] += "|";
+            }
         }
         Console.WriteLine();
         if(i != 7)
@@ -14,6 +19,7 @@
                 Console.Write("-");
         Console.WriteLine();
     }
+    return boardS;
 }
 String getPice(int m)
 {
@@ -632,79 +638,47 @@ int evaluate(int[,] board)
         }
     return evo;
 }
-Move getBestMoveWhite(int[,] board,int deep,int currEvo)
-{
-    if (deep == 0)
-    {
-        LinkedList<int[,]> movesNoSeek = getAllMoves(board, true);
-        Move bestMoveNoSeek = new Move();
-        bestMoveNoSeek.evo = 1000000;
-        foreach (int[,] move in movesNoSeek)
-        {
-            int thisEvo = evaluate(move);
-            if(thisEvo < bestMoveNoSeek.evo)
-            {
-                bestMoveNoSeek.evo = thisEvo;
-                bestMoveNoSeek.board = move;
-            }
-        }
-        return bestMoveNoSeek;
-    }
-    LinkedList<int[,]> moves = getAllMoves(board,true);
-    Move bestMove=new Move();
-    bestMove.evo = currEvo;
-    foreach (int[,] move in moves)
-    {
-        Move hisMove = getBestMoveBlack(move, deep - 1,currEvo);
-        if (hisMove.evo <= bestMove.evo)
-        {
-            bestMove.board = move;
-            bestMove.evo = hisMove.evo;
-        }
-        else
-            return bestMove;
-    }
-    return bestMove;
-}
-Move getBestMoveBlack(int[,] board, int deep,int currEvo)
-{
-    if (deep == 0)
-    {
-        LinkedList<int[,]> movesNoSeek = getAllMoves(board, true);
-        Move bestMoveNoSeek = new Move();
-        bestMoveNoSeek.evo = -1000000;
-        foreach (int[,] move in movesNoSeek)
-        {
-            int thisEvo = evaluate(move);
-            if (thisEvo >= bestMoveNoSeek.evo)
-            {
-                bestMoveNoSeek.evo = thisEvo;
-                bestMoveNoSeek.board = move;
-            }
-        }
-        return bestMoveNoSeek;
-    }
-    LinkedList<int[,]> moves = getAllMoves(board, false);
-    Move bestMove = new Move();
-    bestMove.evo = -1000000;
-    foreach (int[,] move in moves)
-    {
-        Move hisMove = getBestMoveWhite(move, deep - 1,currEvo);
-        if (hisMove.evo > bestMove.evo)
-        {
-            bestMove.board = move;
-            bestMove.evo = hisMove.evo;
-        }
-        else
-            return bestMove;
-    }
-    return bestMove;
 
-}
-int[,] board =
+int Search(int[,] board,int depth, int alpha, int beta,bool whiteMove)
+{
+    if (depth == 0) return evaluate(board);
+    LinkedList<int[,]> moves = getAllMoves(board, whiteMove);
+    if (moves.Count == 0)
     {
-    { 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0 },
+        return 1000000; //might change the sign
+    }
+    foreach (int[,] move in moves)
+    {
+        int eva = -Search(move,depth - 1, -beta, -alpha,!whiteMove);
+        if (eva >= beta)
+            return beta;
+        alpha = Math.Max(alpha, eva);
+    }
+    return alpha;
+}
+int[,] getBestMove(int[,] board, int depth)
+{
+    int alpha = -3;
+    int beta = 9;
+    LinkedList<int[,]> moves = getAllMoves(board, false);
+    int bestMoveEvo = Search(moves.First.Value,depth,alpha,beta,true);
+    int[,] bestBoard = moves.First.Value;
+    foreach (int[,] move in moves)
+    {
+        int evo = Search(move, depth, alpha, beta,true);
+        //show(move);
+        if (evo > bestMoveEvo)
+        {
+            bestMoveEvo = evo;
+            bestBoard = move;
+        }
+    }
+    return bestBoard;
+}
+int[,] NormalBoard =
+    {
+    { 4, 2, 3, 5, 6, 3, 2, 4 },
+    { 1, 1, 1, 1, 1, 1, 1, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -714,14 +688,14 @@ int[,] board =
 };
 int[,] otherBoard =
     {
-    { 4, 0, 3 ,5 ,6 ,0 ,2 ,4 },
-    { 1, 1, 1, 0, 0, 1, 1, 0 },
-    { 0, 0, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 3, 0,-1, 0, 0, 0 },
+    { 3, 0, 0, 4, 0, 0, 6, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, -3, 0, 0, 0, 0, 0, 0 },
-    {-1,-1,-1,-1, 0,-1, 0,-1 },
-    {-4,-2,-3,-5, 0, 5,-6, 0 }
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 0,-1, 0, 0, 0, 0 },
+    { 0,-5,-1, 0, 0, 0, 0, 0 },
+    {-1, 0, 0, 0, 0,-1,-1,-1 },
+    {-4, 0,-3,-4, 0, 0,-6, 0 }
 };
 int[,] smallBoard =
 {
@@ -729,7 +703,7 @@ int[,] smallBoard =
     { 2, 0, 3 },
     { 0, -3, 0 }
 };
-int[,] nextMove = getBestMoveWhite(otherBoard,7,100000).board;
+int[,] nextMove = getBestMove(otherBoard,4);
 show(nextMove);
 
 /* 1 pawn
@@ -741,7 +715,7 @@ show(nextMove);
  * if numbers are positive then its a black pieace, and negative is white
  * 
  * Still work in progres, this program can not calculate the best move yet
- * I have been working on it for just a couple houres now
+ * I have been working on it for just 2 days now
  * 
  * 
  */
