@@ -617,6 +617,44 @@ LinkedList<int[,]> getAllMoves(int[,] board,bool whiteMove)
     }
     return moves;
 }
+(int,int) findPieace(int[,] board,int pieaceVal)
+{
+    for (int i = 0; i < board.GetLength(0); i++)
+        for (int j = 0; j < board.GetLength(0); j++)
+            if (board[i, j] == pieaceVal)
+                return (i,j);
+    return (-1, -1);
+}
+bool inCheck(int[,] board, bool whiteMove)
+{
+    int kingValue = whiteMove ? -6 : 6;
+    (int kingRow, int kingCol) = findPieace(board, kingValue);
+
+    if (kingRow == -1) return true;
+
+    LinkedList<int[,]> opponentMoves = getAllMoves(board, !whiteMove);
+
+    foreach (int[,] moveBoard in opponentMoves)
+    {
+        if (findPieace(moveBoard, kingValue) == (-1,-1))
+            return true; // king was captured
+    }
+
+    return false;
+}
+LinkedList<int[,]> getAllLeagalMoves(int[,] board, bool whiteMove)
+{
+    LinkedList<int[,]> allMoves = getAllMoves(board, whiteMove);
+    LinkedList<int[,]> leagalMoves = new LinkedList<int[,]>();
+    foreach (int[,] move in allMoves)
+    {
+        if (!inCheck(move, whiteMove))
+        {
+            leagalMoves.AddLast(move);
+        }
+    }
+    return leagalMoves;
+}
 int evaluate(int[,] board)
 {
     int evo = 0;
@@ -624,7 +662,7 @@ int evaluate(int[,] board)
         for(int j = 0; j < board.GetLength(0); j++)
         {
             if (Math.Abs(board[i, j]) == 6)
-                evo += board[i, j] * 150;
+                evo += board[i, j] * 1500;
             if (Math.Abs(board[i, j]) == 1)
                 evo += board[i, j] * 10;
             if (Math.Abs(board[i, j]) == 2)
@@ -642,37 +680,53 @@ int evaluate(int[,] board)
 int Search(int[,] board,int depth, int alpha, int beta,bool whiteMove)
 {
     if (depth == 0) return evaluate(board);
-    LinkedList<int[,]> moves = getAllMoves(board, whiteMove);
+    LinkedList<int[,]> moves = getAllLeagalMoves(board, whiteMove);
     if (moves.Count == 0)
     {
-        return 1000000; //might change the sign
+        if (inCheck(board, whiteMove))
+        {
+            if(whiteMove)
+                return -10000000 - depth;
+            return 10000000;
+        }
+        else
+            return 0;
     }
     foreach (int[,] move in moves)
     {
-        int eva = -Search(move,depth - 1, -beta, -alpha,!whiteMove);
-        if (eva >= beta)
+   
+        int evo = -Search(move,depth - 1, -beta, -alpha,!whiteMove);
+        if (evo >= beta)
             return beta;
-        alpha = Math.Max(alpha, eva);
+        alpha = Math.Max(alpha, evo);
     }
+
     return alpha;
 }
 int[,] getBestMove(int[,] board, int depth)
 {
-    int alpha = -3;
-    int beta = 9;
-    LinkedList<int[,]> moves = getAllMoves(board, false);
+    int alpha = -10000000;
+    int beta = 10000000;
+    LinkedList<int[,]> moves = getAllLeagalMoves(board, false);
     int bestMoveEvo = Search(moves.First.Value,depth,alpha,beta,true);
     int[,] bestBoard = moves.First.Value;
+    bool first = true;
     foreach (int[,] move in moves)
     {
+        if (first)
+        {
+            first = false;
+            continue;
+        }
         int evo = Search(move, depth, alpha, beta,true);
-        //show(move);
+        
         if (evo > bestMoveEvo)
         {
             bestMoveEvo = evo;
             bestBoard = move;
         }
     }
+    Console.WriteLine(bestMoveEvo);
     return bestBoard;
 }
 int[,] NormalBoard =
@@ -688,12 +742,12 @@ int[,] NormalBoard =
 };
 int[,] otherBoard =
     {
-    { 3, 0, 0, 4, 0, 0, 6, 0 },
-    { 0, 0, 0, 0, 0, 1, 1, 1 },
+    { 0, 0, 0, 0, 0, 0, 6, 0 },
+    { 0, 0, 0, 4, 0, 1, 1, 1 },
+    { 0, 0, 0, 0, 0, 3, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0,-1, 0, 0, 0, 0 },
-    { 0,-5,-1, 0, 0, 0, 0, 0 },
+    { 0,-5, 0,-1, 0, 0, 0, 0 },
+    { 0, 0,-1, 0, 0, 0, 0, 0 },
     {-1, 0, 0, 0, 0,-1,-1,-1 },
     {-4, 0,-3,-4, 0, 0,-6, 0 }
 };
@@ -703,6 +757,7 @@ int[,] smallBoard =
     { 2, 0, 3 },
     { 0, -3, 0 }
 };
+//Console.WriteLine(Search(otherBoard,4,-100000,1000000,true));
 int[,] nextMove = getBestMove(otherBoard,4);
 show(nextMove);
 
