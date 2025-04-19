@@ -771,6 +771,7 @@ String toChessNotation(Board board,String move)
         not += "g";
     else if (move[3] == '7')
         not += "h";
+    else return move;
     not += (8-(move[2]-'0')).ToString();
     return not;
 }
