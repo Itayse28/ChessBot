@@ -1,3 +1,4 @@
+using ConsoleApp1;
 String[] show(int[,] board)
 {
     String[] boardS = new string[8];
@@ -644,13 +645,18 @@ bool inCheck(int[,] board, bool whiteMove)
 }
 LinkedList<int[,]> getAllLeagalMoves(int[,] board, bool whiteMove)
 {
+    int baseEvo = evaluate(board);
     LinkedList<int[,]> allMoves = getAllMoves(board, whiteMove);
     LinkedList<int[,]> leagalMoves = new LinkedList<int[,]>();
     foreach (int[,] move in allMoves)
     {
+        int evo = evaluate(move);
         if (!inCheck(move, whiteMove))
         {
-            leagalMoves.AddLast(move);
+            if((evo>baseEvo&&!whiteMove)||(evo<baseEvo&&whiteMove))
+                leagalMoves.AddFirst(move);
+            else
+                leagalMoves.AddLast(move);
         }
     }
     return leagalMoves;
@@ -676,7 +682,6 @@ int evaluate(int[,] board)
         }
     return evo;
 }
-
 int Search(int[,] board,int depth, int alpha, int beta,bool whiteMove)
 {
     if (depth == 0) return evaluate(board);
@@ -684,17 +689,12 @@ int Search(int[,] board,int depth, int alpha, int beta,bool whiteMove)
     if (moves.Count == 0)
     {
         if (inCheck(board, whiteMove))
-        {
-            if(whiteMove)
-                return -10000000 - depth;
-            return 10000000;
-        }
+            return -10000000 + depth;
         else
             return 0;
     }
     foreach (int[,] move in moves)
     {
-   
         int evo = -Search(move,depth - 1, -beta, -alpha,!whiteMove);
         if (evo >= beta)
             return beta;
@@ -703,12 +703,12 @@ int Search(int[,] board,int depth, int alpha, int beta,bool whiteMove)
 
     return alpha;
 }
-int[,] getBestMove(int[,] board, int depth)
+int[,] getBestMove(int[,] board, int depth,bool whiteMove)
 {
-    int alpha = -10000000;
-    int beta = 10000000;
-    LinkedList<int[,]> moves = getAllLeagalMoves(board, false);
-    int bestMoveEvo = Search(moves.First.Value,depth,alpha,beta,true);
+    int alpha = -100000;
+    int beta = 100000;
+    LinkedList<int[,]> moves = getAllLeagalMoves(board, whiteMove);
+    int bestMoveEvo = Search(moves.First.Value,depth,alpha,beta,!whiteMove);
     int[,] bestBoard = moves.First.Value;
     bool first = true;
     foreach (int[,] move in moves)
@@ -718,9 +718,8 @@ int[,] getBestMove(int[,] board, int depth)
             first = false;
             continue;
         }
-        int evo = Search(move, depth, alpha, beta,true);
-        
-        if (evo > bestMoveEvo)
+        int evo = Search(move, depth, alpha, beta,!whiteMove);
+        if (evo < bestMoveEvo)
         {
             bestMoveEvo = evo;
             bestBoard = move;
@@ -728,6 +727,52 @@ int[,] getBestMove(int[,] board, int depth)
     }
     Console.WriteLine(bestMoveEvo);
     return bestBoard;
+}
+
+Board getBestBoard(Board board,int depth)
+{
+    LinkedList<String> moves=board.getAllLeagalMoves();
+    LinkedList<Board> boards=new LinkedList<Board>();
+    foreach (String move in moves)
+    {
+        Board b = board.CloneThis();
+        b.forceMove(move);
+        boards.AddLast(b);
+    }
+    Parallel.ForEach(boards, b =>
+    {
+        b.searched = b.Search(depth,-100000, 100000);
+    }
+    );
+    Board best = boards.First.Value;
+    foreach(Board b in boards)
+    {
+        if (b.searched < best.searched)
+            best = b;
+    }
+    return best;
+}
+String toChessNotation(Board board,String move)
+{
+    String not =getPice( board.board[move[0]-'0',move[1]-'0']).ToUpper();
+    if (move[3] == '0')
+        not += "a";
+    else if (move[3] == '1')
+        not += "b";
+    else if (move[3] == '2')
+        not += "c";
+    else if (move[3] == '3')
+        not += "d";
+    else if (move[3] == '4')
+        not += "e";
+    else if (move[3] == '5')
+        not += "f";
+    else if (move[3] == '6')
+        not += "g";
+    else if (move[3] == '7')
+        not += "h";
+    not += (8-(move[2]-'0')).ToString();
+    return not;
 }
 int[,] NormalBoard =
     {
@@ -742,14 +787,25 @@ int[,] NormalBoard =
 };
 int[,] otherBoard =
     {
-    { 0, 0, 0, 0, 0, 0, 6, 0 },
-    { 0, 0, 0, 4, 0, 1, 1, 1 },
-    { 0, 0, 0, 0, 0, 3, 0, 0 },
+    { 0, 0, 0, 0, 0, 0, 0, 6 },
+    { 0, 0, 0, 0, 0, 1, 1, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { 0, 0, 4, 0, 0, 0, 0, 0 },
     { 0,-5, 0,-1, 0, 0, 0, 0 },
     { 0, 0,-1, 0, 0, 0, 0, 0 },
     {-1, 0, 0, 0, 0,-1,-1,-1 },
     {-4, 0,-3,-4, 0, 0,-6, 0 }
+};
+int[,] otherBoard2 =
+    {
+    { 0, 0, 0, 0, 0, 0, 6, 0 },
+    { 0, 0, 0, 0, 0, 1, 1, 1 },
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    {-1,-1, 0,-2, 0, 0, 0, 0 },
+    {-1,-1, 0, 0, 0, 0, 0, 0 },
+    {-1,-1, 0, 0, 0, 0, 0, 0 },
+    {-1,-1, 0, 0, 0,-1,-1,-1 },
+    {-4, 0, 0, 0,-6, 0, 0, 0 }
 };
 int[,] smallBoard =
 {
@@ -757,10 +813,21 @@ int[,] smallBoard =
     { 2, 0, 3 },
     { 0, -3, 0 }
 };
-//Console.WriteLine(Search(otherBoard,4,-100000,1000000,true));
-int[,] nextMove = getBestMove(otherBoard,4);
-show(nextMove);
 
+TimeSpan now=DateTime.Now.TimeOfDay;
+
+Board b = new Board();
+b.Create(otherBoard,false);
+
+b.show();
+Console.WriteLine("calculating the best move...");
+
+Board best = getBestBoard(b,5);
+best.show();
+Console.WriteLine(toChessNotation(b,best.lastMove));
+
+TimeSpan then= DateTime.Now.TimeOfDay;
+Console.WriteLine(then-now);
 /* 1 pawn
  * 2 knight
  * 3 bishop
@@ -769,7 +836,7 @@ show(nextMove);
  * 6 king
  * if numbers are positive then its a black pieace, and negative is white
  * 
- * Still work in progres, this program can not calculate the best move yet
+ * Still work in progres
  * I have been working on it for just 2 days now
  * 
  * 
