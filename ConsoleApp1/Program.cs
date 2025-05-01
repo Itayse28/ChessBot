@@ -1065,7 +1065,7 @@ class Program
             }
             else
                 input = Console.ReadLine();
-            if (input.Equals("O-O\n"))
+            if (input.Equals("O-O"))
             {
                 board[7, 4] = 0;
                 board[7, 7] = 0;
@@ -1073,7 +1073,7 @@ class Program
                 board[7, 6] = -6;
 
             }
-            else if (input.Equals("O-O-O\n"))
+            else if (input.Equals("O-O-O"))
             {
                 board[7, 4] = 0;
                 board[7, 0] = 0;
@@ -1150,7 +1150,7 @@ class Program
                 input = Console.ReadLine();
 
             LinkedList<int[,]> allLeagalMoves = getAllLeagalMoves(board, whiteMove);
-            if (input.Equals("O-O\n"))
+            if (input.Equals("O-O"))
             {
                 board[7, 4] = 0;
                 board[7, 7] = 0;
@@ -1158,7 +1158,7 @@ class Program
                 board[7, 6] = -6;
                 continue;
             }
-            else if (input.Equals("O-O-O\n"))
+            else if (input.Equals("O-O-O"))
             {
                 board[7, 4] = 0;
                 board[7, 0] = 0;
