@@ -8,8 +8,10 @@ using WindowsInput.Native;
 using System.Diagnostics;
 class Program
 {
-    
-    
+    static bool StockfishPlay = true;
+    static bool whiteMove = true;
+    static int depth = 5;
+
     static String[] show(int[,] board)
     {
         String[] boardS = new string[8];
@@ -1021,22 +1023,23 @@ class Program
     { 0, 0, 0,-3, 0,-2, 0, 0 },
     {-1,-1,-1,-1, 0,-1,-1,-1 },
     {-4,-2,-3, 0, 0,-4,-6, 0 }
-};
+}; 
     static int[,] smallBoard =
     {
     { 4, 0, 0 },
     { 2, 0, 3 },
     { 0, -3, 0 }
     };
+
+    static int[,] board = NormalBoard;
+    
     static void Main()
     {
-        bool StockfishPlay = false;
+        
 
         var StockfishEngine=new StockfishEngine();
         StockfishEngine.StartEngine("C:/Users/itaik/Downloads/stockfish/stockfish-windows-x86-64-avx2.exe");
-        int[,] board = otherBoard;
-        bool whiteMove = false;
-        int depth = 5;
+        
         int movesCount=0;
 
         String url = "nextchessmove.com/?fen=";
@@ -1048,9 +1051,9 @@ class Program
         if (whiteMove)
         {
             Console.WriteLine("How to make move:");
-            Console.WriteLine("Row+Collum Numbers of the pieace you want to move");
-            Console.WriteLine("then you add the Row and Collum numbers of the square you want to move to");
-            Console.WriteLine("for example in the starting board the move 6444 is like e4\n");
+            Console.WriteLine("Row+Collum of the pieace you want to move");
+            Console.WriteLine("then you add the Row+Collum of the square you want to move to");
+            Console.WriteLine("for example in the starting board the move e2e4 is like pawn to e4 because the pawn starting position is e2\n");
             show(board);
             Console.WriteLine("Waiting for your move: ");
             String fen = FEN(board,whiteMove);
@@ -1236,7 +1239,7 @@ class Program
  * if numbers are positive then its a black pieace, and negative is white
  * 
  * Still work in progres
- * I have been working on it for just 2 days now
+ * I have been working on it for just 3 days now
  * 
  * 
  */
