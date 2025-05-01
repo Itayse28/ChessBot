@@ -8,7 +8,7 @@ using WindowsInput.Native;
 using System.Diagnostics;
 class Program
 {
-    static bool StockfishPlay = true;
+    static bool StockfishPlay = false;
     static bool whiteMove = true;
     static int depth = 5;
 
@@ -1156,6 +1156,15 @@ class Program
                 board[7, 7] = 0;
                 board[7, 5] = -4;
                 board[7, 6] = -6;
+                whiteMove = !whiteMove;
+                movesCount++;
+                if (StockfishPlay)
+                {
+                    ClipboardService.SetText(url + FEN(board, whiteMove).Split(' ')[0] + "%20b%20-%20-%200%201");
+                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_L);
+                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
+                    sim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                }
                 continue;
             }
             else if (input.Equals("O-O-O"))
@@ -1164,6 +1173,15 @@ class Program
                 board[7, 0] = 0;
                 board[7, 3] = -4;
                 board[7, 2] = -6;
+                whiteMove = !whiteMove;
+                movesCount++;
+                if (StockfishPlay)
+                {
+                    ClipboardService.SetText(url + FEN(board, whiteMove).Split(' ')[0] + "%20b%20-%20-%200%201");
+                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_L);
+                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
+                    sim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
+                }
                 continue;
             }
             if(input.Length==4)
