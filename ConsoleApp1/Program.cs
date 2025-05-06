@@ -2,10 +2,8 @@ using ConsoleApp1;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Windows;
-using TextCopy;
-using WindowsInput.Native;
-using System.Diagnostics;
+
+
 class Program
 {
     static bool StockfishPlay = false;
@@ -1122,7 +1120,6 @@ class Program
             }
             whiteMove = false;
             movesCount = 1;
-            ClipboardService.SetText(FEN(board,whiteMove));
         }
         while (getAllLeagalMoves(board,whiteMove).Count!=0)
         {
@@ -1130,7 +1127,6 @@ class Program
             show(board);
             Console.WriteLine("calculating the best move...");
             board = getBestMoveFaster(board, depth, whiteMove);
-            ClipboardService.SetText(FEN(board, whiteMove));
             show(board);
             whiteMove = !whiteMove;
             if (getAllLeagalMoves(board, whiteMove).Count == 0)
@@ -1158,13 +1154,6 @@ class Program
                 board[7, 6] = -6;
                 whiteMove = !whiteMove;
                 movesCount++;
-                if (StockfishPlay)
-                {
-                    ClipboardService.SetText(url + FEN(board, whiteMove).Split(' ')[0] + "%20b%20-%20-%200%201");
-                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_L);
-                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
-                    sim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-                }
                 continue;
             }
             else if (input.Equals("O-O-O"))
@@ -1175,13 +1164,6 @@ class Program
                 board[7, 2] = -6;
                 whiteMove = !whiteMove;
                 movesCount++;
-                if (StockfishPlay)
-                {
-                    ClipboardService.SetText(url + FEN(board, whiteMove).Split(' ')[0] + "%20b%20-%20-%200%201");
-                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_L);
-                    sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
-                    sim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-                }
                 continue;
             }
             if(input.Length==4)
@@ -1223,13 +1205,6 @@ class Program
             }
             whiteMove = !whiteMove;
             movesCount++;
-            if (StockfishPlay)
-            {
-                ClipboardService.SetText(url + FEN(board, whiteMove).Split(' ')[0] + "%20b%20-%20-%200%201");
-                sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_L);
-                sim.Keyboard.ModifiedKeyStroke(VirtualKeyCode.CONTROL, VirtualKeyCode.VK_V);
-                sim.Keyboard.KeyPress(VirtualKeyCode.RETURN);
-            }
         }
         show(board);
         if (!inCheck(board, whiteMove))
