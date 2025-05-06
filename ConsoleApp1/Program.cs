@@ -887,59 +887,6 @@ class Program
         }
         return bestMove;
     }
-    static Board getBestBoard(Board board, int depth)
-    {
-        LinkedList<String> moves = board.getAllLeagalMoves();
-        LinkedList<Board> boards = new LinkedList<Board>();
-        foreach (String move in moves)
-        {
-            Board b = board.CloneThis();
-            b.forceMove(move);
-            boards.AddLast(b);
-        }
-        Parallel.ForEach(boards, b =>
-        {
-            try
-            {
-                b.searched = b.Search(depth, -100000, 100000);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
-        );
-        Board best = boards.First.Value;
-        foreach (Board b in boards)
-        {
-            if (b.searched < best.searched)
-                best = b;
-        }
-        return best;
-    }
-    static String toChessNotation(Board board, String move)
-    {
-        String not = getPieace(board.board[move[0] - '0', move[1] - '0']).ToUpper();
-        if (move[3] == '0')
-            not += "a";
-        else if (move[3] == '1')
-            not += "b";
-        else if (move[3] == '2')
-            not += "c";
-        else if (move[3] == '3')
-            not += "d";
-        else if (move[3] == '4')
-            not += "e";
-        else if (move[3] == '5')
-            not += "f";
-        else if (move[3] == '6')
-            not += "g";
-        else if (move[3] == '7')
-            not += "h";
-        else return move;
-        not += (8 - (move[2] - '0')).ToString();
-        return not;
-    }
     static bool ContainsMatrixByValue(LinkedList<int[,]> list, int[,] target)
     {
         foreach (var item in list)
@@ -1040,12 +987,7 @@ class Program
         
         int movesCount=0;
 
-        String url = "nextchessmove.com/?fen=";
-        String chromePath = "C:/Program Files/Google/Chrome/Application/chrome.exe";
-        var sim = new WindowsInput.InputSimulator();
-        ClipboardService.SetText(FEN(board, whiteMove));
-        if(StockfishPlay)
-            Process.Start(chromePath, url + FEN(board, whiteMove).Split(' ')[0] + "%20b%20-%20-%200%201");
+
         if (whiteMove)
         {
             Console.WriteLine("How to make move:");
